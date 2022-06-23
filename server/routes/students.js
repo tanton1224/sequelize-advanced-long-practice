@@ -30,9 +30,6 @@ router.get('/', async (req, res, next) => {
     page = parseInt(page)
     size = parseInt(size)
 
-    console.log(size)
-    console.log(Number.isInteger(size))
-
     if (size >= 1 && page >= 1 && size <= 200 && Number.isInteger(page) && Number.isInteger(size)) {
         pagination.limit = size
         pagination.offset = size * (page-1)
@@ -47,31 +44,52 @@ router.get('/', async (req, res, next) => {
         // 'Requires valid page and size params' when page or size is invalid
     // Your code here
     // Phase 4: Student Search Filters
-    /*
-        firstName filter:
-            If the firstName query parameter exists, set the firstName query
-                filter to find a similar match to the firstName query parameter.
-            For example, if firstName query parameter is 'C', then the
-                query should match with students whose firstName is 'Cam' or
-                'Royce'.
 
-        lastName filter: (similar to firstName)
-            If the lastName query parameter exists, set the lastName query
-                filter to find a similar match to the lastName query parameter.
-            For example, if lastName query parameter is 'Al', then the
-                query should match with students whose lastName has 'Alfonsi' or
-                'Palazzo'.
+        // firstName filter:
+        //     If the firstName query parameter exists, set the firstName query
+        //         filter to find a similar match to the firstName query parameter.
+        //     For example, if firstName query parameter is 'C', then the
+        //         query should match with students whose firstName is 'Cam' or
+        //         'Royce'.
 
-        lefty filter:
-            If the lefty query parameter is a string of 'true' or 'false', set
-                the leftHanded query filter to a boolean of true or false
-            If the lefty query parameter is neither of those, add an error
-                message of 'Lefty should be either true or false' to
-                errorResult.errors
-    */
+        // lastName filter: (similar to firstName)
+        //     If the lastName query parameter exists, set the lastName query
+        //         filter to find a similar match to the lastName query parameter.
+        //     For example, if lastName query parameter is 'Al', then the
+        //         query should match with students whose lastName has 'Alfonsi' or
+        //         'Palazzo'.
+
+        // lefty filter:
+        //     If the lefty query parameter is a string of 'true' or 'false', set
+        //         the leftHanded query filter to a boolean of true or false
+        //     If the lefty query parameter is neither of those, add an error
+        //         message of 'Lefty should be either true or false' to
+        //         errorResult.errors
+
     const where = {};
 
+
     // Your code here
+    let { lefty } = req.query
+    if (req.query.firstName) {
+        let { firstName } = req.query
+
+        where.firstName = { [Op.like]: `%${firstName}%`}
+    }
+    if (req.query.lastName) {
+        let { lastName } = req.query
+
+        where.lastName = { [Op.like]: `%${lastName}%`}
+    }
+    if (lefty) {
+        if (lefty === 'true') {
+            where.leftHanded = true
+        } else if (lefty === 'false') {
+            where.leftHanded = false
+        } else {
+            errorResult.errors.push({message: "Lefty should be either true or false"})
+        }
+    }
 
 
     // Phase 2C: Handle invalid params with "Bad Request" response
@@ -90,24 +108,25 @@ router.get('/', async (req, res, next) => {
             return a "Bad Request" response with the errorResult as the body
             of the response.
 
-            Ex:
-                errorResult = {
-                    errors: [{ message: 'Grade should be a number' }],
+    Ex:
+        errorResult = {
+            errors: [{ message: 'Grade should be a number' }],
                     count: 267,
                     pageCount: 0
                 }
                 */
-               // Your code here
+    // Your code here
 
-               let result = {};
-               if(page ===0){
-                result.page = 1
-               } else {
-                result.page =page
-               }
+    let result = {};
 
-               // Phase 3A: Include total number of results returned from the query without
-               // limits and offsets as a property of count on the result
+    if(page ===0){
+        result.page = 1
+    } else {
+        result.page =page
+    }
+
+    // Phase 3A: Include total number of results returned from the query without
+    // limits and offsets as a property of count on the result
     // Note: This should be a new query
     result.count = await Student.count()
 

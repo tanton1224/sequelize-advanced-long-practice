@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import model(s)
-const { Student } = require('../db/models');
+const { Student, sequelize } = require('../db/models');
 const { Op } = require("sequelize");
 
 // List
@@ -75,6 +75,14 @@ router.get('/', async (req, res, next) => {
 
 
     // Phase 2C: Handle invalid params with "Bad Request" response
+    console.log(errorResult.errors)
+    if(errorResult.errors.length > 0){
+
+            res.statusCode = 400,
+            res.json(errorResult)
+            return
+    }
+
     // Phase 3C: Include total student count in the response even if params were
         // invalid
         /*
@@ -88,14 +96,25 @@ router.get('/', async (req, res, next) => {
                     count: 267,
                     pageCount: 0
                 }
-        */
-    // Your code here
+                */
+               // Your code here
 
-    let result = {};
+               let result = {};
+               if(page ===0){
+                result.page = 1
+               } else {
+                result.page =page
+               }
 
-    // Phase 3A: Include total number of results returned from the query without
-        // limits and offsets as a property of count on the result
-        // Note: This should be a new query
+               // Phase 3A: Include total number of results returned from the query without
+               // limits and offsets as a property of count on the result
+    // Note: This should be a new query
+    result.count = await Student.count()
+
+    result.pagesCount = Math.ceil((await Student.count())/size)
+
+
+
 
     result.rows = await Student.findAll({
         attributes: ['id', 'firstName', 'lastName', 'leftHanded'],
@@ -106,16 +125,17 @@ router.get('/', async (req, res, next) => {
     });
 
     // Phase 2E: Include the page number as a key of page in the response data
-        // In the special case (page=0, size=0) that returns all students, set
-            // page to 1
-        /*
-            Response should be formatted to look like this:
-            {
-                rows: [{ id... }] // query results,
-                page: 1
-            }
-        */
-    // Your code here
+    // In the special case (page=0, size=0) that returns all students, set
+    // page to 1
+    /*
+    Response should be formatted to look like this:
+    {
+        rows: [{ id... }] // query results,
+        page: 1
+    }
+    */
+   // Your code here
+
 
     // Phase 3B:
         // Include the total number of available pages for this query as a key

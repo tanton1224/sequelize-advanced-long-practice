@@ -12,29 +12,36 @@ router.get('/', async (req, res, next) => {
 
     // Phase 2A: Use query params for page & size
     // Your code here
-    let pagination ={}
+    let pagination = {}
 
-    let { page, size} = req.query;
-    if( typeof page !== 'number' ){
-        page = 1
-    }
-    if( typeof size !== 'number' ){
-        size = 10
-    }
+    let { page, size } = req.query;
 
-    page = page === undefined? 1: parseInt(page)
-    size = size === undefined? 10: parseInt(page)
+
+    // page = page === undefined ? 1 : Number.isInteger(page)
+    // size = size === undefined ? 10 : Number.isInteger(size)
     // Phase 2B: Calculate limit and offset
+    if (!page ) {
+        page = 1;
+    };
+    if (!size) {
+        size = 10;
+    };
 
-    if(size >= 1 && size <=200){
-        pagination.limit =size
-        pagination.offset =size * (page-1)
-    } else {
-        errorResult.errors.push({message:'Requires valid page and size params'
-    })
-    }
+    page = parseInt(page)
+    size = parseInt(size)
+
+    console.log(size)
+    console.log(Number.isInteger(size))
+
+    if (size >= 1 && page >= 1 && size <= 200 && Number.isInteger(page) && Number.isInteger(size)) {
+        pagination.limit = size
+        pagination.offset = size * (page-1)
+    } else if (!(page === 0 && size === 0)) {
+        errorResult.errors.push({message:'Requires valid page and size params'})
+    };
+
+
     // Phase 2B (optional): Special case to return all students (page=0, size=0)
-
 
     // Phase 2B: Add an error message to errorResult.errors of
         // 'Requires valid page and size params' when page or size is invalid
@@ -95,7 +102,7 @@ router.get('/', async (req, res, next) => {
         where,
         // Phase 1A: Order the Students search results
         order: [['lastName'], ['firstName']],
-        // ...pagination
+        ...pagination
     });
 
     // Phase 2E: Include the page number as a key of page in the response data

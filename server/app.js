@@ -47,5 +47,5 @@ app.use((req, res) => {
 });
 
 // Set port and listen for incoming requests - DO NOT MODIFY
-const port = 8000;
+const port = 5050;
 app.listen(port, () => console.log('Server is listening on port', port));
